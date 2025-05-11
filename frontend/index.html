@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bolt App - Asset Pledge Portal</title>
+</head>
+<body>
+    <h1>Bolt App - Asset Pledge Portal</h1>
+
+    <button id="connectWallet">Connect Wallet</button>
+    <div id="walletAddress"></div>
+
+    <br><hr><br>
+
+    <input type="text" id="assetTokenAddress" placeholder="AssetToken Address">
+    <input type="number" id="amount" placeholder="Amount to Pledge">
+    <button id="pledgeAsset">Pledge Asset</button>
+
+    <br><hr><br>
+
+    <input type="text" id="userAddress" placeholder="User Address (admin only)">
+    <input type="text" id="swapAssetTokenAddress" placeholder="AssetToken Address (admin)">
+    <input type="number" id="swapAmount" placeholder="Amount to Swap (admin)">
+    <input type="number" id="amountOutMin" placeholder="Min Amount Out (admin)">
+    <button id="swapPledgedAsset">Swap Pledged Asset (Admin Only)</button>
+
+    <div id="pledgedBalances"></div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
