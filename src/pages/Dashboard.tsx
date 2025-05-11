@@ -186,3 +186,26 @@ const Dashboard: React.FC = () => {
                 </Link>
               </div>
             </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <Coins className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Assets Found</h2>
+          <p className="text-gray-600 mb-6">
+            You haven't tokenized any assets yet. Get started by submitting your first asset.
+          </p>
+          <Link
+            to="/submit-asset"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors duration-200"
+          >
+            <Coins className="mr-2" size={18} />
+            Tokenize Your First Asset
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Dashboard;
