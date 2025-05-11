@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { useWeb3 } from '../contexts/Web3Context';
 import { Coins, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../artifacts/contracts/AssetTokenFactory.sol/AssetTokenFactory.json';
-import AssetTokenABI from '../artifacts/contracts/AssetToken.sol/AssetToken.json';
+import AssetTokenFactoryABI from '../../contracts/AssetTokenFactory.json';
+import AssetTokenABI from '../../contracts/AssetToken.json';
 
 interface AssetToken {
   address: string;
@@ -35,25 +35,18 @@ const Dashboard: React.FC = () => {
             provider
           );
 
-          // Get user's asset tokens
           const tokenAddresses = await factoryContract.getUserAssets(account);
-          
-          // Fetch details for each token
+
           const assetPromises = tokenAddresses.map(async (tokenAddress: string) => {
-            const tokenContract = new ethers.Contract(
-              tokenAddress,
-              AssetTokenABI.abi,
-              provider
-            );
-            
+            const tokenContract = new ethers.Contract(tokenAddress, AssetTokenABI.abi, provider);
+
             const name = await tokenContract.name();
             const symbol = await tokenContract.symbol();
             const balance = ethers.utils.formatUnits(await tokenContract.balanceOf(account), 18);
             const assetType = await tokenContract.assetType();
             const assetValue = ethers.utils.formatUnits(await tokenContract.assetValue(), 2);
             const pledgeStatus = await tokenContract.pledgeStatus(account);
-            
-            // Convert status from number to string
+
             let status;
             switch (pledgeStatus) {
               case 0:
@@ -68,7 +61,7 @@ const Dashboard: React.FC = () => {
               default:
                 status = 'Unknown';
             }
-            
+
             return {
               address: tokenAddress,
               name,
@@ -79,7 +72,7 @@ const Dashboard: React.FC = () => {
               status
             };
           });
-          
+
           const assets = await Promise.all(assetPromises);
           setUserAssets(assets);
         } catch (error) {
@@ -193,26 +186,3 @@ const Dashboard: React.FC = () => {
                 </Link>
               </div>
             </motion.div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <Coins className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Assets Found</h2>
-          <p className="text-gray-600 mb-6">
-            You haven't tokenized any assets yet. Get started by submitting your first asset.
-          </p>
-          <Link
-            to="/submit-asset"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors duration-200"
-          >
-            <Coins className="mr-2" size={18} />
-            Tokenize Your First Asset
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Dashboard;
