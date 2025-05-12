@@ -4,9 +4,9 @@ import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { ArrowRightLeft, AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../abi/AssetTokenFactory.json';
-import AssetTokenABI from '../abi/AssetToken.json';
-import SwapFacilityABI from '../abi/SwapFacility.json';
+import AssetTokenFactoryABI from '../../abi/AssetTokenFactory.json';
+import AssetTokenABI from '../../abi/AssetToken.json';
+import SwapFacilityABI from '../../abi/SwapFacility.json';
 
 const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual deployed address
 const SWAP_FACILITY_ADDRESS = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'; // Replace with actual deployed address
