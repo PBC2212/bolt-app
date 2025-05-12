@@ -5,7 +5,7 @@ import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { ArrowLeft, ExternalLink, Copy, Check, Coins, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenABI from '../artifacts/contracts/AssetToken.sol/AssetToken.json';
+import AssetTokenABI from '../abi/AssetToken.json'; // ✅ FIXED PATH
 
 interface AssetDetails {
   name: string;
@@ -47,7 +47,6 @@ const AssetDetails: React.FC = () => {
           const totalSupply = ethers.utils.formatUnits(await tokenContract.totalSupply(), 18);
           const pledgeStatus = await tokenContract.pledgeStatus(account);
           
-          // Convert status from number to string
           let status;
           switch (pledgeStatus) {
             case 0:
