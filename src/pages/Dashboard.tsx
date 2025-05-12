@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { useWeb3 } from '../contexts/Web3Context';
 import { Coins, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../../abi/AssetTokenFactory.json';
-import AssetTokenABI from '../../abi/AssetToken.json';
+import AssetTokenFactoryABI from '../abi/AssetTokenFactory.json';
+import AssetTokenABI from '../abi/AssetToken.json';
 
 interface AssetToken {
   address: string;
@@ -17,7 +17,7 @@ interface AssetToken {
   status: string;
 }
 
-const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual deployed address
+const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const Dashboard: React.FC = () => {
   const { account, provider, isConnected } = useWeb3();
