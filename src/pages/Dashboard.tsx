@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { useWeb3 } from '../contexts/Web3Context';
 import { Coins, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../../contracts/AssetTokenFactory.json';
-import AssetTokenABI from '../../contracts/AssetToken.json';
+import AssetTokenFactoryABI from '../../artifacts/contracts/AssetTokenFactory.sol/AssetTokenFactory.json';
+import AssetTokenABI from '../../artifacts/contracts/AssetToken.sol/AssetToken.json';
 
 interface AssetToken {
   address: string;
@@ -38,7 +38,11 @@ const Dashboard: React.FC = () => {
           const tokenAddresses = await factoryContract.getUserAssets(account);
 
           const assetPromises = tokenAddresses.map(async (tokenAddress: string) => {
-            const tokenContract = new ethers.Contract(tokenAddress, AssetTokenABI.abi, provider);
+            const tokenContract = new ethers.Contract(
+              tokenAddress,
+              AssetTokenABI.abi,
+              provider
+            );
 
             const name = await tokenContract.name();
             const symbol = await tokenContract.symbol();
