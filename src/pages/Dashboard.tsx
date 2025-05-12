@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { useWeb3 } from '../contexts/Web3Context';
 import { Coins, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../../artifacts/contracts/AssetTokenFactory.sol/AssetTokenFactory.json';
-import AssetTokenABI from '../../artifacts/contracts/AssetToken.sol/AssetToken.json';
+import AssetTokenFactoryABI from '../../abi/AssetTokenFactory.json';
+import AssetTokenABI from '../../abi/AssetToken.json';
 
 interface AssetToken {
   address: string;
