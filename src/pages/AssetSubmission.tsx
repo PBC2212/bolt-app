@@ -5,7 +5,7 @@ import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { AlertTriangle, Coins, UploadCloud } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from '../artifacts/contracts/AssetTokenFactory.sol/AssetTokenFactory.json';
+import AssetTokenFactoryABI from "../abi/AssetTokenFactory.json";
 
 const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual deployed address
 
