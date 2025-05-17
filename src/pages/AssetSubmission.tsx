@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Contract } from 'ethers';
-import { parseUnits } from 'ethers/lib/utils'; // ✅ Corrected for ethers v6
+import { Contract, parseUnits } from 'ethers'; // ✅ Correct for ethers v6
 import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { AlertTriangle, Coins, UploadCloud } from 'lucide-react';
@@ -11,14 +10,7 @@ import AssetTokenFactoryABI from '../abi/AssetTokenFactory.json';
 const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const assetTypes = [
-  'Real Estate',
-  'Gold',
-  'Silver',
-  'Stocks',
-  'Bonds',
-  'Commodities',
-  'Collectibles',
-  'Other'
+  'Real Estate', 'Gold', 'Silver', 'Stocks', 'Bonds', 'Commodities', 'Collectibles', 'Other'
 ];
 
 const AssetSubmission: React.FC = () => {
@@ -70,7 +62,7 @@ const AssetSubmission: React.FC = () => {
       const selectedAssetType =
         formData.assetType === 'Other' ? customAssetType : formData.assetType;
 
-      const assetValueInCents = parseUnits(formData.assetValue, 2);
+      const assetValueInCents = parseUnits(formData.assetValue, 2); // ✅ ethers v6
 
       const factoryContract = new Contract(
         FACTORY_ADDRESS,
@@ -131,7 +123,6 @@ const AssetSubmission: React.FC = () => {
         >
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
-              {/* Asset Name */}
               <div>
                 <label htmlFor="assetName" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Name *
@@ -148,7 +139,6 @@ const AssetSubmission: React.FC = () => {
                 />
               </div>
 
-              {/* Symbol */}
               <div>
                 <label htmlFor="assetSymbol" className="block text-sm font-medium text-gray-700 mb-1">
                   Token Symbol *
@@ -169,7 +159,6 @@ const AssetSubmission: React.FC = () => {
                 </p>
               </div>
 
-              {/* Type */}
               <div>
                 <label htmlFor="assetType" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Type *
@@ -191,7 +180,6 @@ const AssetSubmission: React.FC = () => {
                 </select>
               </div>
 
-              {/* Custom Type */}
               {formData.assetType === 'Other' && (
                 <div>
                   <label htmlFor="customAssetType" className="block text-sm font-medium text-gray-700 mb-1">
@@ -209,7 +197,6 @@ const AssetSubmission: React.FC = () => {
                 </div>
               )}
 
-              {/* Description */}
               <div>
                 <label htmlFor="assetDescription" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Description
@@ -225,7 +212,6 @@ const AssetSubmission: React.FC = () => {
                 />
               </div>
 
-              {/* Value */}
               <div>
                 <label htmlFor="assetValue" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Value (USD) *
@@ -250,7 +236,6 @@ const AssetSubmission: React.FC = () => {
                 </p>
               </div>
 
-              {/* File Upload */}
               <div>
                 <label htmlFor="assetDocuments" className="block text-sm font-medium text-gray-700 mb-1">
                   Supporting Documents
@@ -258,9 +243,7 @@ const AssetSubmission: React.FC = () => {
                 <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                   <div className="flex flex-col items-center justify-center">
                     <UploadCloud className="h-12 w-12 text-gray-400 mb-3" />
-                    <p className="text-gray-600 mb-1">
-                      Drag and drop files here or click to browse
-                    </p>
+                    <p className="text-gray-600 mb-1">Drag and drop files here or click to browse</p>
                     <p className="text-xs text-gray-500 mb-4">
                       Upload proof of ownership, appraisals, or other relevant documents
                     </p>
@@ -292,7 +275,6 @@ const AssetSubmission: React.FC = () => {
                 </p>
               </div>
 
-              {/* Submit */}
               <div className="pt-2">
                 <button
                   type="submit"
