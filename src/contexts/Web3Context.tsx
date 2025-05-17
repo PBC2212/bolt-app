@@ -58,7 +58,7 @@ const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
             setAccount(address);
             setProvider(_provider);
             setSigner(signer);
-            setChainId(Number(network.chainId));
+            setChainId(Number(network.chainId)); // ✅ converted to number
             setIsAdmin(address.toLowerCase() === ADMIN_ADDRESS.toLowerCase());
           }
         } catch (err) {
@@ -109,10 +109,11 @@ const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         setAccount(address);
         setProvider(_provider);
         setSigner(signer);
-        setChainId(Number(network.chainId));
+        setChainId(Number(network.chainId)); // ✅ converted to number
         setIsAdmin(address.toLowerCase() === ADMIN_ADDRESS.toLowerCase());
 
-        if (network.chainId !== 97) {
+        // ✅ FIXED comparison using Number()
+        if (Number(network.chainId) !== 97) {
           toast.warning('Please switch to BSC Testnet');
           try {
             await window.ethereum.request({
