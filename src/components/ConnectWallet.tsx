@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';  // ✅ Make sure this is imported!
+import { BrowserProvider } from 'ethers'; // ✅ v6 correct import
 
 export default function ConnectWallet() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -11,8 +11,7 @@ export default function ConnectWallet() {
     }
 
     try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const provider = new ethers.BrowserProvider(window.ethereum); // ✅ fixed line
+      const provider = new BrowserProvider(window.ethereum); // ✅ correct for v6
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
       setWalletAddress(address);
@@ -24,7 +23,7 @@ export default function ConnectWallet() {
   };
 
   useEffect(() => {
-    connectWallet(); // auto connect on load
+    connectWallet(); // auto connect
   }, []);
 
   return (
