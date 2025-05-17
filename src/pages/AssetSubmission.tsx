@@ -1,29 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
+import { parseUnits, Contract } from 'ethers'; // ✅ ethers v6
 import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { AlertTriangle, Coins, UploadCloud } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AssetTokenFactoryABI from "../abi/AssetTokenFactory.json";
 
-const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual deployed address
+const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const assetTypes = [
-  'Real Estate',
-  'Gold',
-  'Silver',
-  'Stocks',
-  'Bonds',
-  'Commodities',
-  'Collectibles',
-  'Other'
+  'Real Estate', 'Gold', 'Silver', 'Stocks', 'Bonds', 'Commodities', 'Collectibles', 'Other'
 ];
 
 const AssetSubmission: React.FC = () => {
   const { account, signer, isConnected } = useWeb3();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     assetName: '',
     assetSymbol: '',
@@ -32,62 +25,51 @@ const AssetSubmission: React.FC = () => {
     assetValue: '',
     assetDocuments: null as File | null
   });
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [customAssetType, setCustomAssetType] = useState('');
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({
-        ...formData,
-        assetDocuments: e.target.files[0]
-      });
+      setFormData({ ...formData, assetDocuments: e.target.files[0] });
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isConnected || !signer) {
       toast.error('Please connect your wallet first');
       return;
     }
-    
+
     try {
       setSubmitting(true);
-      
-      // Validate form
+
       if (!formData.assetName || !formData.assetSymbol || !formData.assetValue) {
         toast.error('Please fill in all required fields');
         setSubmitting(false);
         return;
       }
-      
-      // Get selected asset type
-      const selectedAssetType = formData.assetType === 'Other' ? customAssetType : formData.assetType;
-      
-      // Convert asset value to cents (for USD)
-      const assetValueInCents = ethers.utils.parseUnits(formData.assetValue, 2);
-      
-      // In a real app, you would upload the document to IPFS or a server here
-      // For this demo, we'll just show a success message for the document
-      
-      // Create contract instance
-      const factoryContract = new ethers.Contract(
+
+      const selectedAssetType =
+        formData.assetType === 'Other' ? customAssetType : formData.assetType;
+
+      const assetValueInCents = parseUnits(formData.assetValue, 2); // ✅ ethers v6
+
+      const factoryContract = new Contract(
         FACTORY_ADDRESS,
         AssetTokenFactoryABI.abi,
         signer
       );
-      
-      // Create asset token
+
       const tx = await factoryContract.createAssetToken(
         formData.assetName,
         formData.assetSymbol,
@@ -96,13 +78,11 @@ const AssetSubmission: React.FC = () => {
         account,
         assetValueInCents
       );
-      
-      // Wait for transaction to be mined
+
       await tx.wait();
-      
+
       toast.success('Asset submitted for tokenization successfully!');
       navigate('/dashboard');
-      
     } catch (error: any) {
       console.error('Error submitting asset:', error);
       toast.error(error.message || 'Failed to submit asset');
@@ -110,7 +90,7 @@ const AssetSubmission: React.FC = () => {
       setSubmitting(false);
     }
   };
-  
+
   if (!isConnected) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -124,7 +104,7 @@ const AssetSubmission: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-3xl mx-auto">
@@ -134,7 +114,7 @@ const AssetSubmission: React.FC = () => {
             Provide details about your real-world asset to create its digital token.
           </p>
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,6 +123,7 @@ const AssetSubmission: React.FC = () => {
         >
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
+              {/* Asset Name */}
               <div>
                 <label htmlFor="assetName" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Name *
@@ -158,7 +139,8 @@ const AssetSubmission: React.FC = () => {
                   required
                 />
               </div>
-              
+
+              {/* Symbol */}
               <div>
                 <label htmlFor="assetSymbol" className="block text-sm font-medium text-gray-700 mb-1">
                   Token Symbol *
@@ -178,7 +160,8 @@ const AssetSubmission: React.FC = () => {
                   Maximum 5 characters (e.g. BTC, ETH, GOLD)
                 </p>
               </div>
-              
+
+              {/* Type */}
               <div>
                 <label htmlFor="assetType" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Type *
@@ -199,7 +182,8 @@ const AssetSubmission: React.FC = () => {
                   ))}
                 </select>
               </div>
-              
+
+              {/* Custom Type */}
               {formData.assetType === 'Other' && (
                 <div>
                   <label htmlFor="customAssetType" className="block text-sm font-medium text-gray-700 mb-1">
@@ -216,7 +200,8 @@ const AssetSubmission: React.FC = () => {
                   />
                 </div>
               )}
-              
+
+              {/* Description */}
               <div>
                 <label htmlFor="assetDescription" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Description
@@ -231,7 +216,8 @@ const AssetSubmission: React.FC = () => {
                   placeholder="Provide a detailed description of your asset..."
                 />
               </div>
-              
+
+              {/* Value */}
               <div>
                 <label htmlFor="assetValue" className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Value (USD) *
@@ -255,7 +241,8 @@ const AssetSubmission: React.FC = () => {
                   Each token will represent $1 USD of asset value
                 </p>
               </div>
-              
+
+              {/* File Upload */}
               <div>
                 <label htmlFor="assetDocuments" className="block text-sm font-medium text-gray-700 mb-1">
                   Supporting Documents
@@ -290,13 +277,14 @@ const AssetSubmission: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 p-4 rounded-md">
                 <p className="text-sm text-blue-800">
                   <span className="font-medium">Note:</span> Submitted assets will require admin approval before tokenization. You will be notified once your asset has been reviewed.
                 </p>
               </div>
-              
+
+              {/* Submit */}
               <div className="pt-2">
                 <button
                   type="submit"
