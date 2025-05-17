@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ethers } from 'ethers';
+import { Contract, formatUnits } from 'ethers'; // ✅ Corrected for ethers v6
 import { useWeb3 } from '../contexts/Web3Context';
 import { Coins, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
       if (isConnected && provider && account) {
         try {
           setLoading(true);
-          const factoryContract = new ethers.Contract(
+          const factoryContract = new Contract(
             FACTORY_ADDRESS,
             AssetTokenFactoryABI.abi,
             provider
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
           const tokenAddresses = await factoryContract.getUserAssets(account);
 
           const assetPromises = tokenAddresses.map(async (tokenAddress: string) => {
-            const tokenContract = new ethers.Contract(
+            const tokenContract = new Contract(
               tokenAddress,
               AssetTokenABI.abi,
               provider
@@ -46,13 +46,13 @@ const Dashboard: React.FC = () => {
 
             const name = await tokenContract.name();
             const symbol = await tokenContract.symbol();
-            const balance = ethers.utils.formatUnits(await tokenContract.balanceOf(account), 18);
+            const balance = formatUnits(await tokenContract.balanceOf(account), 18);
             const assetType = await tokenContract.assetType();
-            const assetValue = ethers.utils.formatUnits(await tokenContract.assetValue(), 2);
+            const assetValue = formatUnits(await tokenContract.assetValue(), 2);
             const pledgeStatus = await tokenContract.pledgeStatus(account);
 
             let status;
-            switch (pledgeStatus) {
+            switch (Number(pledgeStatus)) {
               case 0:
                 status = 'Pending';
                 break;
