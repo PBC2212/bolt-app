@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { parseUnits, Contract } from 'ethers'; // ✅ ethers v6
+import { Contract } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils'; // ✅ Corrected for ethers v6
 import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { AlertTriangle, Coins, UploadCloud } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AssetTokenFactoryABI from "../abi/AssetTokenFactory.json";
+import AssetTokenFactoryABI from '../abi/AssetTokenFactory.json';
 
 const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const assetTypes = [
-  'Real Estate', 'Gold', 'Silver', 'Stocks', 'Bonds', 'Commodities', 'Collectibles', 'Other'
+  'Real Estate',
+  'Gold',
+  'Silver',
+  'Stocks',
+  'Bonds',
+  'Commodities',
+  'Collectibles',
+  'Other'
 ];
 
 const AssetSubmission: React.FC = () => {
@@ -62,7 +70,7 @@ const AssetSubmission: React.FC = () => {
       const selectedAssetType =
         formData.assetType === 'Other' ? customAssetType : formData.assetType;
 
-      const assetValueInCents = parseUnits(formData.assetValue, 2); // ✅ ethers v6
+      const assetValueInCents = parseUnits(formData.assetValue, 2);
 
       const factoryContract = new Contract(
         FACTORY_ADDRESS,
