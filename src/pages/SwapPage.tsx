@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import {
+  Contract,
+  formatUnits,
+  formatEther,
+  parseUnits,
+  parseEther,
+} from 'ethers';
 import { useWeb3 } from '../contexts/Web3Context';
 import { toast } from 'react-toastify';
 import { ArrowRightLeft, AlertTriangle, Info } from 'lucide-react';
@@ -8,8 +14,8 @@ import AssetTokenFactoryABI from "../abi/AssetTokenFactory.json";
 import AssetTokenABI from "../abi/AssetToken.json";
 import SwapFacilityABI from "../abi/SwapFacility.json";
 
-const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual deployed address
-const SWAP_FACILITY_ADDRESS = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'; // Replace with actual deployed address
+const FACTORY_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const SWAP_FACILITY_ADDRESS = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 
 interface TokenOption {
   address: string;
@@ -20,64 +26,59 @@ interface TokenOption {
 
 const SwapPage: React.FC = () => {
   const { account, provider, signer, isConnected } = useWeb3();
-  
+
   const [tokens, setTokens] = useState<TokenOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [swapping, setSwapping] = useState(false);
   const [selectedToken, setSelectedToken] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [estimatedBNB, setEstimatedBNB] = useState<string>('0');
-  const [bnbPrice, setBnbPrice] = useState<string>('300.00'); // Default BNB price
+  const [bnbPrice, setBnbPrice] = useState<string>('300.00');
   const [hasFetchedPrice, setHasFetchedPrice] = useState(false);
-  
-  // Fetch user's tokens
+
   useEffect(() => {
     const fetchUserTokens = async () => {
       if (isConnected && provider && account) {
         try {
           setLoading(true);
-          const factoryContract = new ethers.Contract(
+          const factoryContract = new Contract(
             FACTORY_ADDRESS,
             AssetTokenFactoryABI.abi,
             provider
           );
-          
-          // Get user's asset tokens
+
           const tokenAddresses = await factoryContract.getUserAssets(account);
-          
-          // Fetch details for each token
+
           const tokenPromises = tokenAddresses.map(async (tokenAddress: string) => {
-            const tokenContract = new ethers.Contract(
+            const tokenContract = new Contract(
               tokenAddress,
               AssetTokenABI.abi,
               provider
             );
-            
+
             const name = await tokenContract.name();
             const symbol = await tokenContract.symbol();
-            const balance = ethers.utils.formatUnits(await tokenContract.balanceOf(account), 18);
+            const balance = formatUnits(await tokenContract.balanceOf(account), 18);
             const status = await tokenContract.pledgeStatus(account);
-            
-            // Only include approved tokens (status = 1)
+
             if (status.toString() === '1') {
               return {
                 address: tokenAddress,
                 name,
                 symbol,
-                balance
+                balance,
               };
             }
             return null;
           });
-          
+
           const fetchedTokens = (await Promise.all(tokenPromises)).filter(Boolean) as TokenOption[];
           setTokens(fetchedTokens);
-          
-          // Set default selected token if available
+
           if (fetchedTokens.length > 0) {
             setSelectedToken(fetchedTokens[0].address);
           }
-          
+
         } catch (error) {
           console.error('Error fetching user tokens:', error);
           toast.error('Failed to load your tokens');
@@ -89,49 +90,46 @@ const SwapPage: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchUserTokens();
   }, [account, provider, isConnected]);
-  
-  // Fetch BNB price
+
   useEffect(() => {
     const fetchBNBPrice = async () => {
       if (provider && !hasFetchedPrice) {
         try {
-          const swapContract = new ethers.Contract(
+          const swapContract = new Contract(
             SWAP_FACILITY_ADDRESS,
             SwapFacilityABI.abi,
             provider
           );
-          
+
           const price = await swapContract.getBNBPrice();
-          const formattedPrice = ethers.utils.formatUnits(price, 8);
+          const formattedPrice = formatUnits(price, 8);
           setBnbPrice(formattedPrice);
           setHasFetchedPrice(true);
         } catch (error) {
           console.error('Error fetching BNB price:', error);
-          // Use default price if fetch fails
         }
       }
     };
-    
+
     fetchBNBPrice();
   }, [provider, hasFetchedPrice]);
-  
-  // Calculate estimated BNB when amount or token changes
+
   useEffect(() => {
     const calculateEstimatedBNB = async () => {
       if (provider && selectedToken && amount && parseFloat(amount) > 0) {
         try {
-          const swapContract = new ethers.Contract(
+          const swapContract = new Contract(
             SWAP_FACILITY_ADDRESS,
             SwapFacilityABI.abi,
             provider
           );
-          
-          const amountInWei = ethers.utils.parseEther(amount);
+
+          const amountInWei = parseEther(amount);
           const bnbAmount = await swapContract.calculateBNBAmount(selectedToken, amountInWei);
-          setEstimatedBNB(ethers.utils.formatEther(bnbAmount));
+          setEstimatedBNB(formatEther(bnbAmount));
         } catch (error) {
           console.error('Error calculating BNB amount:', error);
           setEstimatedBNB('0');
@@ -140,104 +138,92 @@ const SwapPage: React.FC = () => {
         setEstimatedBNB('0');
       }
     };
-    
+
     calculateEstimatedBNB();
   }, [provider, selectedToken, amount]);
-  
+
   const handleTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedToken(e.target.value);
   };
-  
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || !isNaN(parseFloat(value))) {
       setAmount(value);
     }
   };
-  
+
   const handleMaxClick = () => {
-    if (selectedToken) {
-      const token = tokens.find(t => t.address === selectedToken);
-      if (token) {
-        setAmount(token.balance);
-      }
+    const token = tokens.find(t => t.address === selectedToken);
+    if (token) {
+      setAmount(token.balance);
     }
   };
-  
+
   const handleSwap = async () => {
     if (!isConnected || !signer) {
       toast.error('Please connect your wallet first');
       return;
     }
-    
-    if (!selectedToken) {
-      toast.error('Please select a token');
+
+    if (!selectedToken || !amount || parseFloat(amount) <= 0) {
+      toast.error('Please select a token and enter a valid amount');
       return;
     }
-    
-    if (!amount || parseFloat(amount) <= 0) {
-      toast.error('Please enter a valid amount');
-      return;
-    }
-    
+
     const token = tokens.find(t => t.address === selectedToken);
     if (!token) {
       toast.error('Invalid token selected');
       return;
     }
-    
+
     if (parseFloat(amount) > parseFloat(token.balance)) {
       toast.error('Insufficient token balance');
       return;
     }
-    
+
     try {
       setSwapping(true);
-      
-      // First approve the swap facility to spend tokens
-      const tokenContract = new ethers.Contract(
+
+      const tokenContract = new Contract(
         selectedToken,
         AssetTokenABI.abi,
         signer
       );
-      
-      const amountInWei = ethers.utils.parseEther(amount);
-      
+
+      const amountInWei = parseEther(amount);
+
       const approveTx = await tokenContract.approve(SWAP_FACILITY_ADDRESS, amountInWei);
       await approveTx.wait();
-      
-      // Then perform the swap
-      const swapContract = new ethers.Contract(
+
+      const swapContract = new Contract(
         SWAP_FACILITY_ADDRESS,
         SwapFacilityABI.abi,
         signer
       );
-      
+
       const swapTx = await swapContract.swapTokensForBNB(selectedToken, amountInWei);
       await swapTx.wait();
-      
-      toast.success(`Successfully swapped ${amount} ${token.symbol} for ${estimatedBNB} BNB`);
-      
-      // Reset form and refresh tokens
+
+      toast.success(`Swapped ${amount} ${token.symbol} for ${estimatedBNB} BNB`);
       setAmount('');
-      
-      // Refresh token balances
+
       const updatedTokens = [...tokens];
       const tokenIndex = updatedTokens.findIndex(t => t.address === selectedToken);
       if (tokenIndex !== -1) {
         const updatedBalance = await tokenContract.balanceOf(account);
-        updatedTokens[tokenIndex].balance = ethers.utils.formatUnits(updatedBalance, 18);
+        updatedTokens[tokenIndex].balance = formatUnits(updatedBalance, 18);
         setTokens(updatedTokens);
       }
-      
+
     } catch (error: any) {
       console.error('Error swapping tokens:', error);
-      toast.error(error.message || 'Failed to swap tokens');
+      toast.error(error.message || 'Swap failed');
     } finally {
       setSwapping(false);
     }
   };
-  
+
   if (!isConnected) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -251,7 +237,7 @@ const SwapPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-lg mx-auto">
@@ -261,7 +247,7 @@ const SwapPage: React.FC = () => {
             Convert your asset-backed tokens to BNB at the current market rate.
           </p>
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -292,7 +278,7 @@ const SwapPage: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
                     Amount
@@ -315,11 +301,11 @@ const SwapPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-center py-4">
                   <ArrowRightLeft className="text-gray-500" size={24} />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     You Will Receive
@@ -335,7 +321,7 @@ const SwapPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-blue-50 p-4 rounded-md flex items-start">
                   <Info className="text-blue-600 mr-2 flex-shrink-0 mt-0.5" size={16} />
                   <div className="text-sm text-blue-800">
@@ -345,7 +331,7 @@ const SwapPage: React.FC = () => {
                     <p className="mt-1 text-xs">A 0.5% swap fee will be applied to the transaction.</p>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={handleSwap}
                   disabled={swapping || !amount || parseFloat(amount) <= 0}
